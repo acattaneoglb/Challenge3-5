@@ -1,0 +1,16 @@
+<resources>
+    <string name="app_name">Contact Studio 2</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_add_contact">Add contact</string>
+    <string name="title_activity_create_contact">Create contact</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="text_first_name">First name</string>
+    <string name="text_last_name">Last name</string>
+    <string name="text_first_name_example">I.e.: John</string>
+    <string name="text_last_name_example">I.e.: Doe</string>
+    <string name="text_nickname">Nickname</string>
+    <string name="text_nickname_example">I.e.: Johnny D</string>
+    <string name="text_picture">Picture</string>
+    <string name="button_done">Done</string>
+    <string name="text_picture_disabled">Picture disabled (no camera)</string>
+</resources>
