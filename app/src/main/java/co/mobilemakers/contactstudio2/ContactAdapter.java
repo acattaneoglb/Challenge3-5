@@ -8,6 +8,9 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.j256.ormlite.dao.Dao;
+
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -19,10 +22,12 @@ public class ContactAdapter extends ArrayAdapter<ContactModel> {
 
     Context mContext;
     List<ContactModel> mContactList;
+    DatabaseHelper mDBHelper;
 
-    public ContactAdapter(Context context, List<ContactModel> todoList) {
+    public ContactAdapter(Context context, DatabaseHelper dbHelper, List<ContactModel> todoList) {
         super(context, R.layout.contact_entry, todoList);
 
+        mDBHelper = dbHelper;
         mContext = context;
         mContactList = todoList;
     }
@@ -58,6 +63,7 @@ public class ContactAdapter extends ArrayAdapter<ContactModel> {
         }
         return rowView;
     }
+
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         View rowView;
@@ -69,4 +75,15 @@ public class ContactAdapter extends ArrayAdapter<ContactModel> {
         return rowView;
     }
 
+    @Override
+    public void add(ContactModel contact) {
+        super.add(contact);
+
+        try {
+            Dao<ContactModel, Integer> documentDao = mDBHelper.getDocumentDao();
+            documentDao.create(contact);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }

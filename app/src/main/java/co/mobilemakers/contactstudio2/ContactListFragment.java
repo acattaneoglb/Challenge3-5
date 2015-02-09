@@ -12,6 +12,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.j256.ormlite.android.apptools.OpenHelperManager;
+
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,6 +26,15 @@ public class ContactListFragment extends ListFragment {
     public final static int REQUEST_NEW_CONTACT = 1;
 
     ContactAdapter mAdapter;
+
+    DatabaseHelper mDBHelper = null;
+
+    public DatabaseHelper getDBHelper() {
+        if (mDBHelper == null) {
+            mDBHelper = OpenHelperManager.getHelper(getActivity(), DatabaseHelper.class);
+        }
+        return mDBHelper;
+    }
 
     public ContactListFragment() {
     }
@@ -44,8 +56,14 @@ public class ContactListFragment extends ListFragment {
     }
 
     private void prepareListView() {
-        List<ContactModel> entries = new ArrayList<>();
-        mAdapter = new ContactAdapter(getActivity(), entries);
+        List<ContactModel> entries;
+        try {
+            entries = getDBHelper().getDocumentDao().queryForAll();
+        } catch (SQLException e) {
+            entries = new ArrayList<>();
+            e.printStackTrace();
+        }
+        mAdapter = new ContactAdapter(getActivity(), mDBHelper, entries);
         setListAdapter(mAdapter);
     }
 
