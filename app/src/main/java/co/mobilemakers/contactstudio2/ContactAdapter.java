@@ -14,7 +14,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 /**
- * TODO: Using info from http://developer.android.com/training/camera/photobasics.html
+ * Adapter for the ContactModel class
  *
  * Created by ariel.cattaneo on 05/02/2015.
  */
@@ -75,15 +75,59 @@ public class ContactAdapter extends ArrayAdapter<ContactModel> {
         return rowView;
     }
 
-    @Override
-    public void add(ContactModel contact) {
-        super.add(contact);
-
+    private void addContactToDB(ContactModel contact) {
         try {
             Dao<ContactModel, Integer> documentDao = mDBHelper.getDocumentDao();
             documentDao.create(contact);
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    private void deleteContactFromDB(ContactModel contact) {
+        try {
+            Dao<ContactModel, Integer> documentDao = mDBHelper.getDocumentDao();
+            documentDao.delete(contact);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void updateContactInDB(ContactModel contact) {
+        try {
+            Dao<ContactModel, Integer> documentDao = mDBHelper.getDocumentDao();
+            documentDao.update(contact);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void add(ContactModel contact) {
+        super.add(contact);
+
+        addContactToDB(contact);
+    }
+
+    @Override
+    public void insert(ContactModel object, int index) {
+        super.insert(object, index);
+
+        addContactToDB(object);
+    }
+
+    @Override
+    public void remove(ContactModel object) {
+        super.remove(object);
+
+        deleteContactFromDB(object);
+    }
+
+    public void update(ContactModel oldObject, ContactModel newObject) {
+        int pos = getPosition(oldObject);
+        super.remove(oldObject);
+        super.insert(newObject, pos);
+
+        updateContactInDB(newObject);
     }
 }

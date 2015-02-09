@@ -41,6 +41,7 @@ public class ContactModel implements Parcelable {
     }
 
     ContactModel(Parcel source) {
+        id = source.readInt();
         mFirstName = source.readString();
         mLastName = source.readString();
         mNickname = source.readString();
@@ -90,6 +91,7 @@ public class ContactModel implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(id);
         dest.writeString(mFirstName);
         dest.writeString(mLastName);
         dest.writeString(mNickname);

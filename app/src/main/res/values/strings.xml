@@ -13,4 +13,6 @@
     <string name="text_picture">Picture</string>
     <string name="button_done">Done</string>
     <string name="text_picture_disabled">Picture disabled (no camera)</string>
+    <string name="button_delete">Delete</string>
+    <string name="button_done_update">Update</string>
 </resources>

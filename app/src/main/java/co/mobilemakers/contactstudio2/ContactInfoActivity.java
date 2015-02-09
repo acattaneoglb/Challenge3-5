@@ -6,15 +6,15 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 
-public class CreateContactActivity extends ActionBarActivity {
+public class ContactInfoActivity extends ActionBarActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_create_contact);
+        setContentView(R.layout.activity_contact_info);
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, new CreateContactFragment())
+                    .add(R.id.container, new ContactInfoFragment())
                     .commit();
         }
     }

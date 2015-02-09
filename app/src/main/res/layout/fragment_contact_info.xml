@@ -5,7 +5,7 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
     android:orientation="vertical"
-    tools:context="co.mobilemakers.contactstudio2.CreateContactFragment">
+    tools:context="co.mobilemakers.contactstudio2.ContactInfoFragment">
 
     <TextView
         android:layout_width="wrap_content"
@@ -57,6 +57,14 @@
             android:text="@string/button_done"
             android:id="@+id/button_done"
             android:layout_gravity="right|bottom" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/button_delete"
+            android:id="@+id/button_delete"
+            android:layout_gravity="center_horizontal|bottom"
+            android:visibility="invisible" />
     </FrameLayout>
 
 </LinearLayout>

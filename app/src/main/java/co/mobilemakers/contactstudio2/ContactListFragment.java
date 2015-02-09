@@ -11,6 +11,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 
 import com.j256.ormlite.android.apptools.OpenHelperManager;
 
@@ -24,10 +25,13 @@ import java.util.List;
 public class ContactListFragment extends ListFragment {
 
     public final static int REQUEST_NEW_CONTACT = 1;
+    public final static int REQUEST_EDIT_CONTACT = 2;
 
     ContactAdapter mAdapter;
 
     DatabaseHelper mDBHelper = null;
+
+    ContactModel oldContact;
 
     public DatabaseHelper getDBHelper() {
         if (mDBHelper == null) {
@@ -43,6 +47,14 @@ public class ContactListFragment extends ListFragment {
         mAdapter.add(contact);
     }
 
+    public void deleteContact() {
+        mAdapter.remove(oldContact);
+    }
+
+    public void updateContact(ContactModel newContact) {
+        mAdapter.update(oldContact, newContact);
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,7 +67,21 @@ public class ContactListFragment extends ListFragment {
         return inflater.inflate(R.layout.fragment_main, container, false);
     }
 
-    private void prepareListView() {
+    protected void callContactActivityToCreate() {
+        Intent intent = new Intent(getActivity(), ContactInfoActivity.class);
+        intent.setAction(ContactInfoFragment.ACTION_NEW_CONTACT);
+        startActivityForResult(intent, REQUEST_NEW_CONTACT);
+    }
+
+    protected void callContactActivityToUpdate(ContactModel contact) {
+        oldContact = contact;
+        Intent intent = new Intent(getActivity(), ContactInfoActivity.class);
+        intent.setAction(ContactInfoFragment.ACTION_EDIT_CONTACT);
+        intent.putExtra(ContactInfoFragment.EXTRA_CONTACT, contact);
+        startActivityForResult(intent, REQUEST_EDIT_CONTACT);
+    }
+
+    protected void prepareListView() {
         List<ContactModel> entries;
         try {
             entries = getDBHelper().getDocumentDao().queryForAll();
@@ -65,6 +91,12 @@ public class ContactListFragment extends ListFragment {
         }
         mAdapter = new ContactAdapter(getActivity(), mDBHelper, entries);
         setListAdapter(mAdapter);
+        getListView().setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                callContactActivityToUpdate(mAdapter.getItem(position));
+            }
+        });
     }
 
     @Override
@@ -80,11 +112,6 @@ public class ContactListFragment extends ListFragment {
         prepareListView();
     }
 
-    protected void callCreateContactActivity() {
-        Intent intent = new Intent(getActivity(), CreateContactActivity.class);
-        startActivityForResult(intent, REQUEST_NEW_CONTACT);
-    }
-
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int menuId = item.getItemId();
@@ -92,7 +119,7 @@ public class ContactListFragment extends ListFragment {
 
         switch (menuId) {
             case R.id.add_contact:
-                callCreateContactActivity();
+                callContactActivityToCreate();
                 handled = true;
                 break;
         }
@@ -107,10 +134,32 @@ public class ContactListFragment extends ListFragment {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_NEW_CONTACT) {
-            if (resultCode == Activity.RESULT_OK) {
-                addContact((ContactModel) data.getParcelableExtra(CreateContactFragment.EXTRA_CONTACT));
-            }
+        switch (requestCode) {
+            case REQUEST_NEW_CONTACT:
+                if (resultCode == Activity.RESULT_OK) {
+                    addContact((ContactModel) data.getParcelableExtra(ContactInfoFragment.EXTRA_CONTACT));
+                }
+                break;
+            case REQUEST_EDIT_CONTACT:
+                if (resultCode == Activity.RESULT_OK) {
+                    if (data.getStringExtra(ContactInfoFragment.EXTRA_ACTION_TAKEN)
+                            .equals(ContactInfoFragment.RESULT_ACTION_UPDATE)) {
+                        updateContact((ContactModel) data.getParcelableExtra(ContactInfoFragment.EXTRA_CONTACT));
+                    }
+                    else if (data.getStringExtra(ContactInfoFragment.EXTRA_ACTION_TAKEN)
+                            .equals(ContactInfoFragment.RESULT_ACTION_DELETE)) {
+                        deleteContact();
+                    }
+                }
         }
+    }
+
+    @Override
+    public void onDestroy() {
+        if (mDBHelper != null) {
+            OpenHelperManager.releaseHelper();
+            mDBHelper = null;
+        }
+        super.onDestroy();
     }
 }

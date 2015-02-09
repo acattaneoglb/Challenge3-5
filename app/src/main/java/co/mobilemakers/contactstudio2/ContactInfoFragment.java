@@ -28,10 +28,16 @@ import java.util.Date;
 /**
  * A placeholder fragment containing a simple view.
  */
-public class CreateContactFragment extends Fragment {
+public class ContactInfoFragment extends Fragment {
 
     static final int REQUEST_IMAGE_CAPTURE = 10;
 
+    public static final String ACTION_NEW_CONTACT = "ACTION_NEW_CONTACT";
+    public static final String ACTION_EDIT_CONTACT = "ACTION_EDIT_CONTACT";
+
+    public static final String EXTRA_ACTION_TAKEN = "EXTRA_ACTION_TAKEN";
+    public static final String RESULT_ACTION_UPDATE = "RESULT_ACTION_UPDATE";
+    public static final String RESULT_ACTION_DELETE = "RESULT_ACTION_DELETE";
     public static final String EXTRA_CONTACT = "EXTRA_CONTACT";
 
     String mCurrentPhotoPath = "";
@@ -42,9 +48,12 @@ public class CreateContactFragment extends Fragment {
     EditText mEditNickname;
     TextView mTextPicture;
     ImageButton mImageButtonPicture;
+    Button mButtonDelete;
     Button mButtonDone;
 
-    public CreateContactFragment() {
+    ContactModel contact;
+
+    public ContactInfoFragment() {
     }
 
     private File createImageFile() throws IOException {
@@ -110,10 +119,23 @@ public class CreateContactFragment extends Fragment {
         }
     }
 
+    private class DeleteListener implements View.OnClickListener {
+        @Override
+        public void onClick(View v) {
+            Activity activity = getActivity();
+            Intent intent = new Intent();
+            intent.putExtra(EXTRA_ACTION_TAKEN, RESULT_ACTION_DELETE);
+            activity.setResult(Activity.RESULT_OK, intent);
+            getActivity().finish();
+        }
+    }
+
     private class DoneListener implements View.OnClickListener {
         @Override
         public void onClick(View v) {
-            ContactModel contact = new ContactModel();
+            if (getActivity().getIntent().getAction().equals(ACTION_NEW_CONTACT)) {
+                contact = new ContactModel();
+            }
             contact.setFirstName(mEditFirstName.getText().toString());
             contact.setLastName(mEditLastName.getText().toString());
             if (mCheckNickname.isChecked()) {
@@ -127,6 +149,9 @@ public class CreateContactFragment extends Fragment {
             Activity activity = getActivity();
             Intent intent = new Intent();
             intent.putExtra(EXTRA_CONTACT, contact);
+            if (getActivity().getIntent().getAction().equals(ACTION_EDIT_CONTACT)) {
+                intent.putExtra(EXTRA_ACTION_TAKEN, RESULT_ACTION_UPDATE);
+            }
             activity.setResult(Activity.RESULT_OK, intent);
             getActivity().finish();
         }
@@ -157,7 +182,31 @@ public class CreateContactFragment extends Fragment {
             mImageButtonPicture.setEnabled(false);
         }
 
+        Intent intent = getActivity().getIntent();
+        if (intent.getAction().equals(ACTION_EDIT_CONTACT)) {
+            contact = intent.getParcelableExtra(ContactInfoFragment.EXTRA_CONTACT);
+            mEditFirstName.setText(contact.getFirstName());
+            mEditLastName.setText(contact.getLastName());
+            String nickname = contact.getNickname();
+            if (!nickname.isEmpty()) {
+                mCheckNickname.setChecked(true);
+                mEditNickname.setText(nickname);
+            }
+            mCurrentPhotoPath = contact.getPhotoURL();
+            if (!mCurrentPhotoPath.isEmpty()) {
+                ImageUtils.setPic(mImageButtonPicture, mCurrentPhotoPath);
+            }
+        }
+
+        mButtonDelete = (Button)view.findViewById(R.id.button_delete);
+        if (intent.getAction().equals(ACTION_EDIT_CONTACT)) {
+            mButtonDelete.setVisibility(View.VISIBLE);
+        }
+
         mButtonDone = (Button)view.findViewById(R.id.button_done);
+        if (intent.getAction().equals(ACTION_EDIT_CONTACT)) {
+            mButtonDone.setText(R.string.button_done_update);
+        }
     }
 
     protected void setListeners() {
@@ -175,13 +224,15 @@ public class CreateContactFragment extends Fragment {
 
         mImageButtonPicture.setOnClickListener(new ImageButtonPictureListener());
 
+        mButtonDelete.setOnClickListener(new DeleteListener());
+
         mButtonDone.setOnClickListener(new DoneListener());
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_create_contact, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_contact_info, container, false);
 
         controlsToVars(rootView);
         setListeners();
